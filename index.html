@@ -22,8 +22,13 @@ for (var i = 0; i < totalBubbles; i++) {
     addBubble();
 }
 
-gravity = 0.04;
-reboundCoeff = 0.5;
+var lineWidth = 6;
+
+var origMaxSpeedX = 10;
+var origMaxSpeedY = 2;
+var gravity = 0.04;
+var reboundCoeff = 0.5;
+var frictionCoeff = 0.5;
 
 function addBubble(){
 	var bubble = {
@@ -39,7 +44,8 @@ function addBubble(){
 function resetBubble(bubble) {
     bubble.x = Math.random() * (canvas.width - 2*bubbleRadius) + bubbleRadius;
     bubble.y = Math.random() * 80 + bubbleRadius;
-    bubble.speed = Math.random() - 0.5;
+    bubble.speedx = origMaxSpeedX*Math.random() - origMaxSpeedX/2;
+    bubble.speedy = origMaxSpeedY*Math.random() - origMaxSpeedY/2;
 }
 
 function animate() {
@@ -67,15 +73,28 @@ function animate() {
         }
 	*/
         // advance the rocks
-        bubble.y += bubble.speed;
-	bubble.speed += gravity;
+        bubble.y += bubble.speedy;
+	bubble.speedy += gravity;
         // if the rock is below the canvas,
         if (bubble.y >= canvas.height - bubble.radius) {
             //resetBubble(bubble);
-	    bubble.speed *= -reboundCoeff;
+	    bubble.speedy *= -reboundCoeff;
 	    bubble.y = canvas.height - bubble.radius;
         }
 
+	bubble.x += bubble.speedx;
+	// friction
+	if(Math.abs(bubble.y - (canvas.height - bubble.radius)) < 0.1){
+		bubble.speedx *= frictionCoeff;
+	}
+	if(bubble.x >= canvas.width- bubble.radius) {
+	    bubble.speedx *= -reboundCoeff;
+	    bubble.x = canvas.width - bubble.radius;
+	}
+	else if(bubble.x < 0){
+	    bubble.speedx *= -reboundCoeff;
+	    bubble.x = 0;
+	}
     }
 
     // redraw everything
@@ -109,7 +128,7 @@ function drawAll() {
       ctx.arc(bubble.x, bubble.y, bubble.radius, 0, 2 * Math.PI, false);
       ctx.fillStyle = 'green';
       ctx.fill();
-      ctx.lineWidth = 5;
+      ctx.lineWidth = lineWidth;
       ctx.strokeStyle = '#003300';
       ctx.stroke();
       ctx.closePath();
