@@ -17,7 +17,7 @@ var continueAnimating = false;
 var bubbleRadius = 20;
 var rocks = [];
 var bubbles = [];
-var totalBubbles = 6;
+var totalBubbles = 3;
 for (var i = 0; i < totalBubbles; i++) {
     addBubble();
 }
@@ -65,13 +65,7 @@ function animate() {
 
         var bubble = bubbles[i];
 
-        // test for rock-block collision
-        /*
-	if (isColliding(bubbles, block)) {
-            score -= 10;
-            resetBubble(bubbles);
-        }
-	*/
+        
         // advance the rocks
         bubble.y += bubble.speedy;
 	bubble.speedy += gravity;
@@ -95,6 +89,17 @@ function animate() {
 	    bubble.speedx *= -reboundCoeff;
 	    bubble.x = 0;
 	}
+
+	// test for bubble collisions
+	for (var j = 0; j < bubbles.length; j++) {
+		if(j==i) continue;
+		var obstacle = bubbles[j];
+		var dist = distance(obstacle.x,obstacle.y, bubble.x, bubble.y);
+		
+		if(dist < (bubble.radius + obstacle.radius)){
+			console.log("!!!");
+		}
+	}
     }
 
     // redraw everything
@@ -102,9 +107,8 @@ function animate() {
 
 }
 
-function isColliding(a, b) {
-    return !(
-    b.x > a.x + a.width || b.x + b.width < a.x || b.y > a.y + a.height || b.y + b.height < a.y);
+function distance(x1,y1,x2,y2){
+	return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
 }
 
 function drawAll() {
