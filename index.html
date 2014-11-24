@@ -22,7 +22,8 @@ for (var i = 0; i < totalBubbles; i++) {
     addBubble();
 }
 
-gravity = 0.02;
+gravity = 0.04;
+reboundCoeff = 0.5;
 
 function addBubble(){
 	var bubble = {
@@ -69,9 +70,10 @@ function animate() {
         bubble.y += bubble.speed;
 	bubble.speed += gravity;
         // if the rock is below the canvas,
-        if (bubble.y > canvas.height) {
+        if (bubble.y >= canvas.height - bubble.radius) {
             //resetBubble(bubble);
-	    bubble.speed *= -1;
+	    bubble.speed *= -reboundCoeff;
+	    bubble.y = canvas.height - bubble.radius;
         }
 
     }
