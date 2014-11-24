@@ -5,7 +5,7 @@
 </head>
 <body>
 <button id="start">Animate</button><br>
-<canvas id="canvas" width=350 height=300></canvas>
+<canvas id="canvas" width=500 height=600></canvas>
 <script>
 //canvas variables
 var canvas = document.getElementById("canvas");
@@ -17,7 +17,7 @@ var continueAnimating = false;
 var bubbleRadius = 20;
 var rocks = [];
 var bubbles = [];
-var totalBubbles = 10;
+var totalBubbles = 6;
 for (var i = 0; i < totalBubbles; i++) {
     addBubble();
 }
@@ -37,9 +37,9 @@ function addBubble(){
 // assign the rock a random speed
 
 function resetBubble(bubble) {
-    bubble.x = Math.random() * (canvas.width - bubbleRadius);
-    bubble.y = 15 + Math.random() * 30;
-    bubble.speed = 0.2 + Math.random() * 0.5;
+    bubble.x = Math.random() * (canvas.width - 2*bubbleRadius) + bubbleRadius;
+    bubble.y = Math.random() * 80 + bubbleRadius;
+    bubble.speed = Math.random() - 0.5;
 }
 
 function animate() {
