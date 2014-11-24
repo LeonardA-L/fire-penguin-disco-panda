@@ -22,6 +22,8 @@ for (var i = 0; i < totalBubbles; i++) {
     addBubble();
 }
 
+gravity = 0.02;
+
 function addBubble(){
 	var bubble = {
 		radius : bubbleRadius
@@ -65,10 +67,11 @@ function animate() {
 	*/
         // advance the rocks
         bubble.y += bubble.speed;
-
+	bubble.speed += gravity;
         // if the rock is below the canvas,
         if (bubble.y > canvas.height) {
-            resetBubble(bubble);
+            //resetBubble(bubble);
+	    bubble.speed *= -1;
         }
 
     }
