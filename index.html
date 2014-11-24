@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+</head>
+<body>
+<button id="start">Animate</button><br>
+<canvas id="canvas" width=350 height=300></canvas>
+<script>
+//canvas variables
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+var continueAnimating = false;
+
+// Bubblez variables
+var bubbleRadius = 20;
+var rocks = [];
+var bubbles = [];
+var totalBubbles = 10;
+for (var i = 0; i < totalBubbles; i++) {
+    addBubble();
+}
+
+function addBubble(){
+	var bubble = {
+		radius : bubbleRadius
+	}
+	resetBubble(bubble);
+	bubbles.push(bubble);
+}
+
+// move the rock to a random position near the top-of-canvas
+// assign the rock a random speed
+
+function resetBubble(bubble) {
+    bubble.x = Math.random() * (canvas.width - bubbleRadius);
+    bubble.y = 15 + Math.random() * 30;
+    bubble.speed = 0.2 + Math.random() * 0.5;
+}
+
+function animate() {
+
+    // request another animation frame
+
+    if (continueAnimating) {
+        requestAnimationFrame(animate);
+    }
+
+    // for each rock
+    // (1) check for collisions
+    // (2) advance the rock
+    // (3) if the rock falls below the canvas, reset that rock
+ 
+    for (var i = 0; i < bubbles.length; i++) {
+
+        var bubble = bubbles[i];
+
+        // test for rock-block collision
+        /*
+	if (isColliding(bubbles, block)) {
+            score -= 10;
+            resetBubble(bubbles);
+        }
+	*/
+        // advance the rocks
+        bubble.y += bubble.speed;
+
+        // if the rock is below the canvas,
+        if (bubble.y > canvas.height) {
+            resetBubble(bubble);
+        }
+
+    }
+
+    // redraw everything
+    drawAll();
+
+}
+
+function isColliding(a, b) {
+    return !(
+    b.x > a.x + a.width || b.x + b.width < a.x || b.y > a.y + a.height || b.y + b.height < a.y);
+}
+
+function drawAll() {
+
+    // clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // draw the background
+    // (optionally drawImage an image)
+    ctx.fillStyle = "ivory";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // draw all rocks
+    for (var i = 0; i < bubbles.length; i++) {
+        var bubble = bubbles[i];
+        // optionally, drawImage(rocksImg,rock.x,rock.y)
+        ctx.fillStyle = "gray";
+        //ctx.fill(rock.x, rock.y, rock.width, rock.height);
+
+	ctx.beginPath();
+      ctx.arc(bubble.x, bubble.y, bubble.radius, 0, 2 * Math.PI, false);
+      ctx.fillStyle = 'green';
+      ctx.fill();
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = '#003300';
+      ctx.stroke();
+      ctx.closePath();
+
+    }
+
+    /*
+    ctx.font = "14px Times New Roman";
+    ctx.fillStyle = "black";
+    ctx.fillText("Score: " + score, 10, 15);
+    */
+}
+
+// button to start the game
+$("#start").click(function () {
+    for (var i = 0; i < bubbles.length; i++) {
+        resetBubble(bubbles[i]);
+    }
+    if (!continueAnimating) {
+        continueAnimating = true;
+        animate();
+    };
+});
+</script>
+
+</body>
