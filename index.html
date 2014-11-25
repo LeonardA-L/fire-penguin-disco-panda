@@ -29,7 +29,7 @@ var origMaxSpeedY = 2;
 var gravity = 0.04;
 var reboundCoeff = 0.5;
 var frictionCoeff = 0.5;
-var collisionCoeff = 0.4;
+var collisionCoeff = 1;
 
 function addBubble(){
 	var bubble = {
@@ -92,9 +92,47 @@ function animate() {
             bubble.x = 0;
         }
 
+
+            for (var j = 0; j < bubbles.length; j++) {
+                if(j==i) continue;
+                var obstacle = bubbles[j];
+                var dist = distance(obstacle.x,obstacle.y, bubble.x, bubble.y);
+                
+                if(dist < (bubble.radius + obstacle.radius)){
+                    //console.log("!!!");
+                    var vx, vy, norm;
+                    vx = obstacle.x - bubble.x;
+                    vy = obstacle.y - bubble.y;
+                    norm = Math.sqrt(vx*vx + vy*vy);
+                    vx/=norm;
+                    vy/=norm;
+                    //console.log(vx+"-"+vy);
+
+                    
+                    bubble.speedx -= vx*obstacle.speedx*collisionCoeff;
+                    bubble.speedy -= vy*obstacle.speedy*collisionCoeff;
+                    
+                    bubble.collision ++;
+                }
+            }
+
     }
 
-    // test for bubble collisions
+    
+
+    // Validate collisions (convserving energy)
+    for (var j = 0; j < bubbles.length; j++) {
+        if(bubble.collision > 0){
+            /*bubble.speedy -= bubble.speedy*collisionCoeff*bubble.collision;
+            bubble.speedx -= bubble.speedx*collisionCoeff*bubble.collision;
+            */
+            bubble.x = bubble.px;
+            bubble.y = bubble.py;
+        }
+        bubble.collision = 0;
+    }
+
+    // Fix last collision issues
     for (var i = 0; i < bubbles.length; i++) {
         var bubble = bubbles[i];
         for (var j = 0; j < bubbles.length; j++) {
@@ -102,26 +140,24 @@ function animate() {
             var obstacle = bubbles[j];
             var dist = distance(obstacle.x,obstacle.y, bubble.x, bubble.y);
             
-            if(dist < (bubble.radius + obstacle.radius)){
+            while(dist < (bubble.radius + obstacle.radius)){
                 //console.log("!!!");
-                // Only punch bubble
-                bubble.speedx += obstacle.speedx*collisionCoeff;
-                bubble.speedy += obstacle.speedy*collisionCoeff;
+                var vx, vy, norm;
+                vx = obstacle.x - bubble.x;
+                vy = obstacle.y - bubble.y;
+                norm = Math.sqrt(vx*vx + vy*vy);
+                vx/=norm;
+                vy/=norm;
+                //console.log(vx+"-"+vy);
+
+                
+                bubble.x -= vx;
+                bubble.y -= vy;
+                
                 bubble.collision ++;
+                dist = distance(obstacle.x,obstacle.y, bubble.x, bubble.y);
             }
         }
-    }
-
-    // Validate collisions (convserving energy)
-    for (var j = 0; j < bubbles.length; j++) {
-        if(bubble.collision > 0){
-            bubble.speedy -= bubble.speedy*collisionCoeff*bubble.collision;
-            bubble.speedx -= bubble.speedx*collisionCoeff*bubble.collision;
-
-            bubble.x = bubble.px;
-            bubble.y = bubble.py;
-        }
-        bubble.collision = 0;
     }
     // redraw everything
     drawAll();
