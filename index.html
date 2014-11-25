@@ -29,6 +29,7 @@ var origMaxSpeedY = 2;
 var gravity = 0.04;
 var reboundCoeff = 0.5;
 var frictionCoeff = 0.5;
+var collisionCoeff = 0.4;
 
 function addBubble(){
 	var bubble = {
@@ -46,6 +47,7 @@ function resetBubble(bubble) {
     bubble.y = Math.random() * 80 + bubbleRadius;
     bubble.speedx = origMaxSpeedX*Math.random() - origMaxSpeedX/2;
     bubble.speedy = origMaxSpeedY*Math.random() - origMaxSpeedY/2;
+    bubble.collision = 0;
 }
 
 function animate() {
@@ -64,44 +66,63 @@ function animate() {
     for (var i = 0; i < bubbles.length; i++) {
 
         var bubble = bubbles[i];
-
-        
+        bubble.px = bubble.x;
+        bubble.py = bubble.y;
         // advance the rocks
         bubble.y += bubble.speedy;
-	bubble.speedy += gravity;
-        // if the rock is below the canvas,
-        if (bubble.y >= canvas.height - bubble.radius) {
-            //resetBubble(bubble);
-	    bubble.speedy *= -reboundCoeff;
-	    bubble.y = canvas.height - bubble.radius;
+        bubble.speedy += gravity;
+            // if the rock is below the canvas,
+            if (bubble.y >= canvas.height - bubble.radius) {
+                //resetBubble(bubble);
+            bubble.speedy *= -reboundCoeff;
+            bubble.y = canvas.height - bubble.radius;
+            }
+
+        bubble.x += bubble.speedx;
+        // friction
+        if(Math.abs(bubble.y - (canvas.height - bubble.radius)) < 0.1){
+            bubble.speedx *= frictionCoeff;
+        }
+        if(bubble.x >= canvas.width- bubble.radius) {
+            bubble.speedx *= -reboundCoeff;
+            bubble.x = canvas.width - bubble.radius;
+        }
+        else if(bubble.x < 0){
+            bubble.speedx *= -reboundCoeff;
+            bubble.x = 0;
         }
 
-	bubble.x += bubble.speedx;
-	// friction
-	if(Math.abs(bubble.y - (canvas.height - bubble.radius)) < 0.1){
-		bubble.speedx *= frictionCoeff;
-	}
-	if(bubble.x >= canvas.width- bubble.radius) {
-	    bubble.speedx *= -reboundCoeff;
-	    bubble.x = canvas.width - bubble.radius;
-	}
-	else if(bubble.x < 0){
-	    bubble.speedx *= -reboundCoeff;
-	    bubble.x = 0;
-	}
-
-	// test for bubble collisions
-	for (var j = 0; j < bubbles.length; j++) {
-		if(j==i) continue;
-		var obstacle = bubbles[j];
-		var dist = distance(obstacle.x,obstacle.y, bubble.x, bubble.y);
-		
-		if(dist < (bubble.radius + obstacle.radius)){
-			console.log("!!!");
-		}
-	}
     }
 
+    // test for bubble collisions
+    for (var i = 0; i < bubbles.length; i++) {
+        var bubble = bubbles[i];
+        for (var j = 0; j < bubbles.length; j++) {
+            if(j==i) continue;
+            var obstacle = bubbles[j];
+            var dist = distance(obstacle.x,obstacle.y, bubble.x, bubble.y);
+            
+            if(dist < (bubble.radius + obstacle.radius)){
+                //console.log("!!!");
+                // Only punch bubble
+                bubble.speedx += obstacle.speedx*collisionCoeff;
+                bubble.speedy += obstacle.speedy*collisionCoeff;
+                bubble.collision ++;
+            }
+        }
+    }
+
+    // Validate collisions (convserving energy)
+    for (var j = 0; j < bubbles.length; j++) {
+        if(bubble.collision > 0){
+            bubble.speedy -= bubble.speedy*collisionCoeff*bubble.collision;
+            bubble.speedx -= bubble.speedx*collisionCoeff*bubble.collision;
+
+            bubble.x = bubble.px;
+            bubble.y = bubble.py;
+        }
+        bubble.collision = 0;
+    }
     // redraw everything
     drawAll();
 
@@ -128,14 +149,23 @@ function drawAll() {
         ctx.fillStyle = "gray";
         //ctx.fill(rock.x, rock.y, rock.width, rock.height);
 
-	ctx.beginPath();
-      ctx.arc(bubble.x, bubble.y, bubble.radius, 0, 2 * Math.PI, false);
-      ctx.fillStyle = 'green';
-      ctx.fill();
-      ctx.lineWidth = lineWidth;
-      ctx.strokeStyle = '#003300';
-      ctx.stroke();
-      ctx.closePath();
+        ctx.beginPath();
+        ctx.arc(bubble.x, bubble.y, bubble.radius, 0, 2 * Math.PI, false);
+        if(i == 0){
+            ctx.fillStyle = '#CC0000';
+        }
+        else if(i == 1){
+            ctx.fillStyle = '#0000CC';
+        }
+        else{
+            ctx.fillStyle = '#00CC00';
+        }
+        //ctx.fillStyle = 'green';
+        ctx.fill();
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = '#003300';
+        ctx.stroke();
+        ctx.closePath();
 
     }
 
